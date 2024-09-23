@@ -3,14 +3,16 @@ from hashlib import sha256
 from pendulum import DateTime
 from pendulum.tz import UTC
 
+from src.abstract import Signable
 
-class Transaction:
-    def __init__(self, sender: str, recipient: str, amount: float, fee: float, signature: str):
+
+class Transaction(Signable):
+    def __init__(self, sender: str, recipient: str, amount: float, fee: float):
+        super().__init__()
         self.sender: str = sender
         self.recipient: str = recipient
         self.amount: float = amount
         self.fee: float = fee
-        self.signature: str = signature
         self.timestamp: DateTime = DateTime.now(UTC)
 
     @property
