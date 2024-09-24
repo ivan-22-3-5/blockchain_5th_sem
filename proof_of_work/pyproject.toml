@@ -11,6 +11,7 @@ python = "^3.12"
 pendulum = "^3.0.0"
 merkly = "^1.0.2"
 cryptography = "^43.0.1"
+pytest = "^8.3.3"
 
 
 [build-system]
