@@ -1,12 +1,18 @@
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
+
 from src.block import Block
 
 
 class Blockchain:
     def __init__(self):
-        self._chain: list[Block] = []
+        self._chain: list[Block] = [Block(protocol_version="1.0",
+                                          transactions=[],
+                                          previous_hash="none",
+                                          target="none",
+                                          nonce=0)]
 
-    def add_block(self, block: Block):
-        if block.verify():
+    def add_block(self, miner_public_key: RSAPublicKey, block: Block):
+        if block.verify(miner_public_key):
             self._chain.append(block)
 
     def get_block(self, index: int) -> Block:
