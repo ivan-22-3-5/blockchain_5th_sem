@@ -1,21 +1,20 @@
 import pytest
+from cryptography.hazmat.primitives.asymmetric import rsa
+from src.wallet import Wallet
 
-from src.block import Block
-from src.transaction import Transaction
 
-
-@pytest.fixture()
-def make_transactions():
-    def _inner(*, quantity):
-        return [Transaction(recipient=f"recipient {i}", sender=f"sender {i}", amount=(i*i+5), fee=i*0.07) for i in range(quantity)]
-    yield _inner
+def generate_keys():
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    public_key = private_key.public_key()
+    return private_key, public_key
 
 
 @pytest.fixture()
-def block(make_transactions):
-    transactions = make_transactions(quantity=7)
-    yield Block(protocol_version="1.0",
-                transactions=transactions,
-                previous_hash="f21345",
-                target="000",
-                nonce=0)
+def sender_and_recipient():
+    yield Wallet(), Wallet()
+
+
+@pytest.fixture
+def keys():
+    private_key, public_key = generate_keys()
+    return private_key, public_key
