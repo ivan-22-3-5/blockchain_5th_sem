@@ -1,24 +1,33 @@
 from hashlib import sha256
+from typing import Optional, Self
 
 from pendulum import DateTime
 from pendulum.tz import UTC
 from merkly.mtree import MerkleTree
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPublicKey
 
-from src.abstract import Signable
 from src.transaction import Transaction
+from src.utils import verify_signature, sign
 
 
-class Block(Signable):
+class Block:
     def __init__(self, protocol_version: str, transactions: list[Transaction], previous_hash: str, target: str,
                  nonce: int = 0):
-        super().__init__()
         self.protocol_version: str = protocol_version
         self.timestamp: DateTime = DateTime.now(UTC)
-        self.transactions: MerkleTree = MerkleTree(list(map(lambda t: t.__str__(), transactions)))
+        self.transactions: MerkleTree = MerkleTree(list(map(lambda t: str(t), transactions)))
         self.merkle_root: str = self.transactions.root.decode("utf-8")
         self.previous_hash: str = previous_hash
         self.target: str = target
         self.nonce: int = nonce
+        self.signature: Optional[str] = None
+
+    def verify(self, miner_public_key: RSAPublicKey) -> bool:
+        return verify_signature(self.signature, self.hash, miner_public_key)
+
+    def sign(self, private_key: RSAPrivateKey) -> Self:
+        self.signature = sign(self.hash, private_key)
+        return self
 
     @property
     def hash(self) -> str:

@@ -1,19 +1,28 @@
 from hashlib import sha256
+from typing import Optional, Self
 
 from pendulum import DateTime
 from pendulum.tz import UTC
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey, RSAPrivateKey
 
-from src.abstract import Signable
+from src.utils import verify_signature, sign
 
 
-class Transaction(Signable):
-    def __init__(self, sender: str, recipient: str, amount: float, fee: float):
-        super().__init__()
-        self.sender: str = sender
-        self.recipient: str = recipient
+class Transaction:
+    def __init__(self, sender: RSAPublicKey, recipient: RSAPublicKey, amount: float, fee: float):
+        self.sender: RSAPublicKey = sender
+        self.recipient: RSAPublicKey = recipient
         self.amount: float = amount
         self.fee: float = fee
         self.timestamp: DateTime = DateTime.now(UTC)
+        self.signature: Optional[str] = None
+
+    def verify(self) -> bool:
+        return verify_signature(self.signature, self.hash, self.sender)
+
+    def sign(self, private_key: RSAPrivateKey) -> Self:
+        self.signature = sign(self.hash, private_key)
+        return self
 
     @property
     def hash(self) -> str:

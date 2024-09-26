@@ -3,7 +3,7 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 from src.block import Block
 
 
-class Blockchain:
+class Chain:
     def __init__(self):
         self._chain: list[Block] = [Block(protocol_version="1.0",
                                           transactions=[],
