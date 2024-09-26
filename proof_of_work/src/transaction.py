@@ -21,12 +21,13 @@ class Transaction:
         return verify_signature(self.signature, self.hash, self.sender)
 
     def sign(self, private_key: RSAPrivateKey) -> Self:
-        self.signature = sign(self.hash, private_key)
+        if self.signature is None:
+            self.signature = sign(self.hash, private_key)
         return self
 
     @property
     def hash(self) -> str:
-        return sha256(str(self).encode()).hexdigest()
+        return sha256(str(self.to_dict().update({"signature": None})).encode()).hexdigest()
 
     def to_dict(self):
         return {

@@ -23,10 +23,13 @@ class Block:
         self.signature: Optional[str] = None
 
     def verify(self, miner_public_key: RSAPublicKey) -> bool:
+        if MerkleTree(self.transactions.raw_leaves).root != self.merkle_root:
+            return False
         return verify_signature(self.signature, self.hash, miner_public_key)
 
     def sign(self, private_key: RSAPrivateKey) -> Self:
-        self.signature = sign(self.hash, private_key)
+        if self.signature is None:
+            self.signature = sign(self.hash, private_key)
         return self
 
     @property
