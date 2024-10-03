@@ -1,7 +1,10 @@
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPublicKey, generate_private_key
 
+
 from src.transaction import Transaction
 from src.transaction_pool import TransactionPool
+from src.utils import get_wallet_address
+from src.wallet_address import WalletAddress
 
 
 class Wallet:
@@ -10,8 +13,10 @@ class Wallet:
                                                                key_size=2048)
         self.public_key: RSAPublicKey = self.private_key.public_key()
 
-    def send_money(self, recipient: RSAPublicKey, amount: float):
-        new_transaction = Transaction(self.public_key,
+        self.address: WalletAddress = get_wallet_address(self.public_key)
+
+    def send_money(self, recipient: WalletAddress, amount: float):
+        new_transaction = Transaction(self.address,
                                       recipient,
                                       amount - amount * 0.01,
                                       fee=amount * 0.01)

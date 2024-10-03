@@ -1,7 +1,11 @@
+import hashlib
+
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPublicKey
+
+from src.wallet_address import WalletAddress
 
 
 def singleton(cls):
@@ -38,3 +42,13 @@ def sign(data: str, key: RSAPrivateKey) -> str:
                                              salt_length=padding.PSS.MAX_LENGTH),
                          algorithm=hashes.SHA256())
     return signature.hex()
+
+
+def get_wallet_address(public_key: RSAPublicKey) -> WalletAddress:
+    return WalletAddress(address_bytes=ripemd160(hashlib.sha256(str(public_key).encode()).hexdigest()))
+
+
+def ripemd160(data: str) -> bytes:
+    ripemd160_hash = hashlib.new('ripemd160')
+    ripemd160_hash.update(hashlib.sha256(data.encode()).digest())
+    return ripemd160_hash.digest()

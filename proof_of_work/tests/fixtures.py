@@ -29,7 +29,7 @@ def transactions(sender_and_recipient):
     transaction_pool = TransactionPool()
     sender, recipient = sender_and_recipient
     for i in range(10):
-        sender.send_money(recipient.public_key, i)
+        sender.send_money(recipient.address, i)
     yield transaction_pool.get_transactions()
 
 
@@ -40,7 +40,7 @@ def chain():
 
 @pytest.fixture
 def block(chain, transactions):
-    block = Block(protocol_version="1.0",
-                  transactions=transactions, previous_hash=chain.get_last_block().hash,
+    block = Block(transactions=transactions,
+                  previous_hash=chain.get_last_block().hash,
                   target=0, nonce=0)
     yield block

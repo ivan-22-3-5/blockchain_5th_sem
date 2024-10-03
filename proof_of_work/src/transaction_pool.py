@@ -12,4 +12,4 @@ class TransactionPool:
             self._transactions.append(transaction)
 
     def get_transactions(self) -> list[Transaction]:
-        return self._transactions.copy()
+        return sorted(self._transactions, key=lambda t: t.fee, reverse=True)[:5]

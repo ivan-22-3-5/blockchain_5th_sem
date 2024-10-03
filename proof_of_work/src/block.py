@@ -11,12 +11,12 @@ from src.utils import verify_signature, sign
 
 
 class Block:
-    def __init__(self, protocol_version: str, transactions: list[Transaction],
-                 previous_hash: str, target: int, nonce: int = 0):
+    def __init__(self, transactions: list[Transaction], previous_hash: str,
+                 target: int, nonce: int = 0, protocol_version: str = "1.0"):
         self.protocol_version: str = protocol_version
         self.timestamp: DateTime = DateTime.now(UTC)
-        self.transactions: list[Transaction] = transactions if transactions else None
-        self.merkle_root: str = MerkleTree([str(t) for t in self.transactions]).root.hex() if transactions else None
+        self.transactions: list[Transaction] = transactions
+        self.merkle_root: str = MerkleTree([str(t) for t in self.transactions]).root.hex()
         self.previous_hash: str = previous_hash
         self.target: int = target
         self.nonce: int = nonce
