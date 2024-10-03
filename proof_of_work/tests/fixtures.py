@@ -42,5 +42,5 @@ def chain():
 def block(chain, transactions):
     block = Block(protocol_version="1.0",
                   transactions=transactions, previous_hash=chain.get_last_block().hash,
-                  target="none", nonce=0)
+                  target=0, nonce=0)
     yield block

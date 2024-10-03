@@ -16,28 +16,40 @@ class Transaction:
         self.fee: float = fee
         self.timestamp: DateTime = DateTime.now(UTC)
         self.signature: Optional[str] = None
+        self.sender_public_key: Optional[RSAPublicKey] = None
+        self.hash: Optional[str] = None
 
     def verify(self) -> bool:
-        return verify_signature(self.signature, self.hash, self.sender)
+        return all([
+            verify_signature(self.signature, self._signable_str(), self.sender_public_key),
+            self.hash == sha256(str(self._hashable_str()).encode()).hexdigest()
+        ])
 
-    def sign(self, private_key: RSAPrivateKey) -> Self:
+    def sign(self, private_key: RSAPrivateKey, public_key: RSAPublicKey) -> Self:
         if self.signature is None:
-            self.signature = sign(self.hash, private_key)
+            self.signature = sign(self._signable_str(), private_key)
+            self.sender_public_key = public_key
+            self.hash = sha256(str(self._hashable_str()).encode()).hexdigest()
         return self
 
-    @property
-    def hash(self) -> str:
-        return sha256(str(self.to_dict().update({"signature": None})).encode()).hexdigest()
-
-    def to_dict(self):
-        return {
+    def to_dict(self, exclude: list[str] = None):
+        dict_repr = {
             "sender": self.sender,
             "recipient": self.recipient,
             "amount": self.amount,
             "fee": self.fee,
+            "timestamp": self.timestamp,
             "signature": self.signature,
-            "timestamp": self.timestamp
+            "sender_public_key": self.sender_public_key,
+            "hash": self.hash
         }
+        return {k: v for k, v in dict_repr.items() if k not in exclude} if exclude else dict_repr
+
+    def _signable_str(self):
+        return str(self.to_dict(exclude=["signature", "sender_public_key", "hash"]))
+
+    def _hashable_str(self):
+        return str(self.to_dict(exclude=["hash"]))
 
     def __str__(self):
         return str(self.to_dict())

@@ -8,13 +8,13 @@ def test_initial_chain(chain):
 
 def test_add_block(chain, block, keys):
     private_key, public_key = keys
-    chain.add_block(public_key, block.sign(private_key))
+    chain.add_block(block.sign(private_key, public_key))
     assert len(chain._chain) == 2
 
 
 def test_get_block(chain, block, keys):
     private_key, public_key = keys
-    chain.add_block(public_key, block.sign(private_key))
+    chain.add_block(block.sign(private_key, public_key))
     assert chain.get_block(1) == block
 
 
@@ -25,5 +25,5 @@ def test_get_block_invalid_index(chain):
 
 def test_get_last_block(chain, block, keys):
     private_key, public_key = keys
-    chain.add_block(public_key, block.sign(private_key))
+    chain.add_block(block.sign(private_key, public_key))
     assert chain.get_last_block() == block

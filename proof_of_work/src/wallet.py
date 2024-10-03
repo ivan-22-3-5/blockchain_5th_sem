@@ -15,4 +15,4 @@ class Wallet:
                                       recipient,
                                       amount - amount * 0.01,
                                       fee=amount * 0.01)
-        TransactionPool().add(new_transaction.sign(self.private_key))
+        TransactionPool().add(new_transaction.sign(self.private_key, self.public_key))

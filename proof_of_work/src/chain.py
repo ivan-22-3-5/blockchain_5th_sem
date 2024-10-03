@@ -1,5 +1,3 @@
-from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
-
 from src.block import Block
 
 
@@ -8,11 +6,11 @@ class Chain:
         self._chain: list[Block] = [Block(protocol_version="1.0",
                                           transactions=[],
                                           previous_hash="none",
-                                          target="none",
+                                          target=0,
                                           nonce=0)]
 
-    def add_block(self, miner_public_key: RSAPublicKey, block: Block):
-        if block.verify(miner_public_key):
+    def add_block(self, block: Block):
+        if block.verify():
             self._chain.append(block)
 
     def get_block(self, index: int) -> Block:
