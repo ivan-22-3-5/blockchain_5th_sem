@@ -1,12 +1,13 @@
+import base58
+
 from src.block import Block
 from src.transaction import Transaction
 from src.utils import ripemd160
-from src.wallet_address import WalletAddress
 
 
 class Chain:
     def __init__(self):
-        genesis_address = WalletAddress(address_bytes=ripemd160('0'))
+        genesis_address = base58.b58encode(ripemd160('0')).decode()
         transactions = [Transaction(sender=genesis_address,
                                     recipient=genesis_address,
                                     amount=0,
@@ -33,7 +34,7 @@ class Chain:
         if len(self._chain) > 0:
             return self._chain[-1]
 
-    def get_balance(self, address: WalletAddress) -> float:
+    def get_balance(self, address: str) -> float:
         balance: float = 0
         for block in self._chain:
             for transaction in block.transactions:

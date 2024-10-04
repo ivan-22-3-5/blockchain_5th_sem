@@ -6,13 +6,12 @@ from pendulum.tz import UTC
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey, RSAPrivateKey
 
 from src.utils import verify_signature, sign
-from src.wallet_address import WalletAddress
 
 
 class Transaction:
-    def __init__(self, sender: WalletAddress, recipient: WalletAddress, amount: float, fee: float):
-        self.sender: WalletAddress = sender
-        self.recipient: WalletAddress = recipient
+    def __init__(self, sender: str, recipient: str, amount: float, fee: float):
+        self.sender: str = sender
+        self.recipient: str = recipient
         self.amount: float = amount
         self.fee: float = fee
         self.timestamp: DateTime = DateTime.now(UTC)

@@ -1,9 +1,7 @@
 import pytest
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-from src.block import Block
 from src.chain import Chain
-from src.transaction_pool import TransactionPool
 from src.wallet import Wallet
 
 
@@ -25,22 +23,5 @@ def keys():
 
 
 @pytest.fixture
-def transactions(sender_and_recipient):
-    transaction_pool = TransactionPool()
-    sender, recipient = sender_and_recipient
-    for i in range(10):
-        sender.send_money(recipient.address, i)
-    yield transaction_pool.get_transactions()
-
-
-@pytest.fixture
 def chain():
     yield Chain()
-
-
-@pytest.fixture
-def block(chain, transactions):
-    block = Block(transactions=transactions,
-                  previous_hash=chain.get_last_block().hash,
-                  target=0, nonce=0)
-    yield block

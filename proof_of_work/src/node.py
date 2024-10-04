@@ -1,10 +1,11 @@
+import base58
+
 from src.block import Block
 from src.chain import Chain
 from src.transaction import Transaction
 from src.transaction_pool import TransactionPool
 from src.utils import ripemd160
 from src.wallet import Wallet
-from src.wallet_address import WalletAddress
 
 
 class Node:
@@ -14,7 +15,7 @@ class Node:
         self.wallet: Wallet = Wallet()
 
     def mine_block(self, target: int) -> Block:
-        coin_base_address = WalletAddress(address_bytes=ripemd160('0'))
+        coin_base_address = base58.b58encode(ripemd160('0')).decode()
         transactions = [Transaction(sender=coin_base_address,
                                     recipient=self.wallet.address,
                                     amount=50.0,
@@ -24,7 +25,7 @@ class Node:
                                     amount=50.0,
                                     fee=0),
                         *TransactionPool().get_transactions()]
-        print(transactions[0].sender.address)
+        print(transactions[0].sender)
         last_block_hash = self.blockchain.get_last_block().hash
         nonce_limit = 1_000_000_000
         for nonce in range(nonce_limit):
@@ -35,7 +36,7 @@ class Node:
             if block.hash.startswith("0" * target):
                 return block
 
-    def send_money(self, recipient: WalletAddress, amount: float):
+    def send_money(self, recipient: str, amount: float):
         balance = self.blockchain.get_balance(self.wallet.address)
         if balance < amount:
             raise Exception("Insufficient funds")

@@ -1,11 +1,10 @@
 import hashlib
 
+import base58
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPublicKey
-
-from src.wallet_address import WalletAddress
 
 
 def singleton(cls):
@@ -44,8 +43,8 @@ def sign(data: str, key: RSAPrivateKey) -> str:
     return signature.hex()
 
 
-def get_wallet_address(public_key: RSAPublicKey) -> WalletAddress:
-    return WalletAddress(address_bytes=ripemd160(hashlib.sha256(str(public_key).encode()).hexdigest()))
+def get_wallet_address(public_key: RSAPublicKey) -> str:
+    return base58.b58encode(ripemd160(hashlib.sha256(str(public_key).encode()).hexdigest())).decode()
 
 
 def ripemd160(data: str) -> bytes:

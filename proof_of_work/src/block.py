@@ -1,13 +1,14 @@
 from hashlib import sha256
 from typing import Optional, Self
 
+import base58
 from pendulum import DateTime
 from pendulum.tz import UTC
 from merkly.mtree import MerkleTree
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPublicKey
 
 from src.transaction import Transaction
-from src.utils import verify_signature, sign
+from src.utils import verify_signature, sign, ripemd160, get_wallet_address
 
 
 class Block:
