@@ -34,3 +34,13 @@ class Node:
                           nonce=nonce).sign(self.wallet.private_key, self.wallet.public_key)
             if block.hash.startswith("0" * target):
                 return block
+
+    def send_money(self, recipient: WalletAddress, amount: float):
+        balance = self.blockchain.get_balance(self.wallet.address)
+        if balance < amount:
+            raise Exception("Insufficient funds")
+        new_transaction = Transaction(self.wallet.address,
+                                      recipient,
+                                      amount - amount * 0.01,
+                                      fee=amount * 0.01)
+        TransactionPool().add(new_transaction.sign(self.wallet.private_key, self.wallet.public_key))

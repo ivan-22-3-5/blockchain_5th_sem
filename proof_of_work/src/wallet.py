@@ -15,9 +15,3 @@ class Wallet:
 
         self.address: WalletAddress = get_wallet_address(self.public_key)
 
-    def send_money(self, recipient: WalletAddress, amount: float):
-        new_transaction = Transaction(self.address,
-                                      recipient,
-                                      amount - amount * 0.01,
-                                      fee=amount * 0.01)
-        TransactionPool().add(new_transaction.sign(self.private_key, self.public_key))

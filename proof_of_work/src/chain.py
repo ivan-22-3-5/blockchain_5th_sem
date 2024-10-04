@@ -32,3 +32,13 @@ class Chain:
     def get_last_block(self) -> Block:
         if len(self._chain) > 0:
             return self._chain[-1]
+
+    def get_balance(self, address: WalletAddress) -> float:
+        balance: float = 0
+        for block in self._chain:
+            for transaction in block.transactions:
+                if transaction.sender == address:
+                    balance -= transaction.amount + transaction.fee
+                if transaction.recipient == address:
+                    balance += transaction.amount
+        return balance
