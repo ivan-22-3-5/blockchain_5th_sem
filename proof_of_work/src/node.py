@@ -16,19 +16,11 @@ class Node:
 
     def mine_block(self, target: int) -> Block:
         coin_base_address = base58.b58encode(ripemd160('0')).decode()
-        transactions = [Transaction(sender=coin_base_address,
-                                    recipient=self.wallet.address,
-                                    amount=50.0,
-                                    fee=0),
-                        Transaction(sender=coin_base_address,
-                                    recipient=self.wallet.address,
-                                    amount=50.0,
-                                    fee=0),
-                        *TransactionPool().get_transactions()]
-        print(transactions[0].sender)
+        transactions = [Transaction(sender=coin_base_address, recipient=self.wallet.address, amount=50.0, fee=0),
+                        Transaction(sender=coin_base_address, recipient=self.wallet.address, amount=50.0, fee=0),
+                        *self.transaction_pool.get_transactions()]
         last_block_hash = self.blockchain.get_last_block().hash
-        nonce_limit = 1_000_000_000
-        for nonce in range(nonce_limit):
+        for nonce in range(1_000_000_000):
             block = Block(transactions=transactions,
                           previous_hash=last_block_hash,
                           target=target,
@@ -40,8 +32,5 @@ class Node:
         balance = self.blockchain.get_balance(self.wallet.address)
         if balance < amount:
             raise Exception("Insufficient funds")
-        new_transaction = Transaction(self.wallet.address,
-                                      recipient,
-                                      amount - amount * 0.01,
-                                      fee=amount * 0.01)
-        TransactionPool().add(new_transaction.sign(self.wallet.private_key, self.wallet.public_key))
+        new_transaction = Transaction(self.wallet.address, recipient, amount, fee=amount * 0.01)
+        self.transaction_pool.add(new_transaction.sign(self.wallet.private_key, self.wallet.public_key))
