@@ -3,7 +3,7 @@ from src.node import Node
 
 def main():
     node = Node()
-    node.mine_block(3)
+    print(node.mine_block(4).hash)
 
 
 if __name__ == '__main__':

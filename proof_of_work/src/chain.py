@@ -21,10 +21,21 @@ class Chain:
                                           previous_hash="none",
                                           target=0,
                                           nonce=0)]
+        self.current_target: int = 4
 
     def add_block(self, block: Block):
-        if block.verify() and self.get_last_block().timestamp < block.timestamp:
+        if self.verify_block(block):
             self._chain.append(block)
+            if len(self._chain) % 1000 > self.current_target:
+                self.current_target += 1
+
+    def verify_block(self, block: Block) -> bool:
+        return all([
+            block.verify(),
+            block.previous_hash == self.get_last_block().hash,
+            self.current_target == block.target,
+            self.get_last_block().timestamp < block.timestamp
+        ])
 
     def get_block(self, index: int) -> Block:
         if 0 < index < len(self._chain):
