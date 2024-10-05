@@ -43,13 +43,13 @@ class Block:
     def to_dict(self, exclude: list[str] = None) -> dict:
         dict_repr = {
             "protocol_version": self.protocol_version,
-            "timestamp": self.timestamp,
+            "timestamp": self.timestamp.for_json(),
             "merkle_root": self.merkle_root,
             "previous_hash": self.previous_hash,
             "target": self.target,
             "nonce": self.nonce,
             "signature": self.signature,
-            "miner_public_key": self.miner_public_key,
+            "miner_public_key": str(self.miner_public_key),
             "hash": self.hash
         }
         return {k: v for k, v in dict_repr.items() if k not in exclude} if exclude else dict_repr

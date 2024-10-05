@@ -38,9 +38,9 @@ class Transaction:
             "recipient": self.recipient,
             "amount": self.amount,
             "fee": self.fee,
-            "timestamp": self.timestamp,
+            "timestamp": self.timestamp.for_json(),
             "signature": self.signature,
-            "sender_public_key": self.sender_public_key,
+            "sender_public_key": str(self.sender_public_key),
             "hash": self.hash
         }
         return {k: v for k, v in dict_repr.items() if k not in exclude} if exclude else dict_repr
