@@ -72,7 +72,7 @@ class Node:
         try:
             self.peers.append(conn)
             while True:
-                data = conn.recv(1024).decode()
+                data = conn.recv(10240).decode()
                 if not data:
                     break
                 message = json.loads(data)
@@ -84,9 +84,9 @@ class Node:
         msg_type = message.get('type')
 
         if msg_type == 'block':
-            print(f"Received new block: {message['block']}")
+            print(f"Received new block: {Block.from_dict(message['block']).hash}")
         elif msg_type == 'transaction':
-            print(f"Received new transaction: {message['transaction']}")
+            print(f"Received new transaction: {Transaction.from_dict(message['transaction']).hash}")
 
     def connect_to_peer(self, peer_host, peer_port):
         peer_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -98,7 +98,7 @@ class Node:
     def listen_to_peer(self, peer_socket):
         try:
             while True:
-                data = peer_socket.recv(1024).decode()
+                data = peer_socket.recv(10240).decode()
                 if not data:
                     break
                 message = json.loads(data)

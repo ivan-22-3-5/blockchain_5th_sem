@@ -49,8 +49,8 @@ class Chain:
         balance: float = 0
         for block in self._chain:
             for transaction in block.transactions:
-                if transaction.sender == address:
-                    balance -= transaction.amount + transaction.fee
                 if transaction.recipient == address:
                     balance += transaction.amount
+                if transaction.sender == address:
+                    balance -= transaction.amount + transaction.fee
         return balance

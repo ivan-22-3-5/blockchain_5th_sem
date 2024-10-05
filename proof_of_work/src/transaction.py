@@ -4,20 +4,23 @@ from typing import Optional, Self
 from pendulum import DateTime
 from pendulum.tz import UTC
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey, RSAPrivateKey
+from cryptography.hazmat.primitives import serialization
 
 from src.utils import verify_signature, sign
 
 
 class Transaction:
-    def __init__(self, sender: str, recipient: str, amount: float, fee: float):
+    def __init__(self, sender: str, recipient: str, amount: float, fee: float,
+                 timestamp: DateTime = DateTime.now(UTC), signature: str = None,
+                 sender_public_key: RSAPublicKey = None, hash: str = None):
         self.sender: str = sender
         self.recipient: str = recipient
         self.amount: float = amount
         self.fee: float = fee
-        self.timestamp: DateTime = DateTime.now(UTC)
-        self.signature: Optional[str] = None
-        self.sender_public_key: Optional[RSAPublicKey] = None
-        self.hash: Optional[str] = None
+        self.timestamp: DateTime = timestamp
+        self.signature: Optional[str] = signature
+        self.sender_public_key: Optional[RSAPublicKey] = sender_public_key
+        self.hash: Optional[str] = hash
 
     def verify(self) -> bool:
         return all([
@@ -40,10 +43,25 @@ class Transaction:
             "fee": self.fee,
             "timestamp": self.timestamp.for_json(),
             "signature": self.signature,
-            "sender_public_key": str(self.sender_public_key),
+            "sender_public_key": self.sender_public_key.public_bytes(
+                serialization.Encoding.PEM,
+                serialization.PublicFormat.SubjectPublicKeyInfo).hex() if self.sender_public_key else None,
             "hash": self.hash
         }
         return {k: v for k, v in dict_repr.items() if k not in exclude} if exclude else dict_repr
+
+    @staticmethod
+    def from_dict(dict_repr: dict) -> 'Transaction':
+        return Transaction(
+            sender=dict_repr["sender"],
+            recipient=dict_repr["recipient"],
+            amount=dict_repr["amount"],
+            fee=dict_repr["fee"],
+            timestamp=DateTime.fromisoformat(dict_repr["timestamp"]),
+            signature=dict_repr["signature"],
+            sender_public_key=serialization.load_pem_public_key(bytes.fromhex(dict_repr["sender_public_key"])) if dict_repr["sender_public_key"] else None,
+            hash=dict_repr["hash"]
+        )
 
     def _signable_str(self):
         return str(self.to_dict(exclude=["signature", "sender_public_key", "hash"]))
