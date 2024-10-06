@@ -3,6 +3,7 @@ import multiprocessing as mp
 import json
 import socket
 import os
+from typing import Optional
 
 from block import Block
 from chain import Chain
@@ -21,7 +22,7 @@ class Node:
         self.port = port
         self.peers = []
         self.server = None
-        self.mining_process: mp.Process = None
+        self.mining_process: Optional[mp.Process] = None
         self.is_mining = False
         self.initialize_connections()
 
@@ -37,13 +38,11 @@ class Node:
             return
         self.is_mining = True
         threading.Thread(target=self.mining).start()
-        print("Miner started")
 
     def stop_mining(self):
         if not self.is_mining:
             return
         self.mining_process.kill()
-        print("Miner stopped")
         self.is_mining = False
 
     def restart_mining(self):
@@ -71,8 +70,10 @@ class Node:
         balance = self.blockchain.get_balance(self.wallet.address)
         if balance < amount:
             raise Exception("Insufficient funds")
-        new_transaction = Transaction(self.wallet.address, recipient, amount, fee=amount * 0.01)
-        self.transaction_pool.add(new_transaction.sign(self.wallet.private_key, self.wallet.public_key))
+        new_transaction = (Transaction(self.wallet.address, recipient, amount, fee=amount * 0.01).
+                           sign(self.wallet.private_key, self.wallet.public_key))
+        self.transaction_pool.add(new_transaction)
+        self.send_transaction(new_transaction)
 
     def start_server(self):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -82,6 +83,7 @@ class Node:
 
         while True:
             conn, addr = self.server.accept()
+            self.peers.append(conn)
             print(f"Connected by {addr}")
             threading.Thread(target=self.listen_to_peer, args=(conn,)).start()
 
@@ -91,8 +93,7 @@ class Node:
                 data = peer_socket.recv(10240).decode()
                 if not data:
                     break
-                message = json.loads(data)
-                self.process_message(message)
+                self.process_message(json.loads(data))
         except Exception as e:
             print(f"Error in peer communication: {e}")
 
@@ -100,7 +101,10 @@ class Node:
         msg_type = message.get('type')
         match msg_type:
             case 'block':
-                self.blockchain.add_block(Block.from_dict(message['block']))
+                block = Block.from_dict(message['block'])
+                print(f"Received block {block.hash} validity: {self.blockchain.verify_block(block)}")
+                self.blockchain.add_block(block)
+                self.restart_mining()
             case 'transaction':
                 self.transaction_pool.add(Transaction.from_dict(message['transaction']))
             case _:

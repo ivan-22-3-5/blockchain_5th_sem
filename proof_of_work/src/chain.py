@@ -21,11 +21,12 @@ class Chain:
                                           previous_hash="none",
                                           target=0,
                                           nonce=0)]
-        self.current_target: int = 3
+        self.current_target: int = 4
 
     def add_block(self, block: Block):
         if self.verify_block(block):
             self._chain.append(block)
+            print(f"Block {block.hash} added previous hash: {block.previous_hash}")
             if len(self._chain) % 1000 > self.current_target:
                 self.current_target += 1
 
