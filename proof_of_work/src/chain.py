@@ -27,7 +27,7 @@ class Chain:
         if self.verify_block(block):
             self._chain.append(block)
             print(f"Block {block.hash} added previous hash: {block.previous_hash}")
-            if len(self._chain) % 1000 > self.current_target:
+            if int(len(self._chain) / 1000) > self.current_target:
                 self.current_target += 1
 
     def verify_block(self, block: Block) -> bool:
