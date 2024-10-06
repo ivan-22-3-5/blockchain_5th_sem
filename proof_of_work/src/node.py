@@ -35,31 +35,37 @@ class Node:
     def start_mining(self):
         if self.is_mining:
             return
-        threading.Thread(target=self._mine_block()).start()
         self.is_mining = True
+        threading.Thread(target=self.mining).start()
+        print("Miner started")
 
     def stop_mining(self):
         if not self.is_mining:
             return
-        self.is_mining = False
         self.mining_process.kill()
+        print("Miner stopped")
+        self.is_mining = False
 
     def restart_mining(self):
         self.stop_mining()
         self.start_mining()
 
-    def _mine_block(self):
+    def mining(self):
+        while self.is_mining:
+            block = self._mine_block()
+            self.blockchain.add_block(block)
+            self.send_block(block)
+
+    def _mine_block(self) -> Block:
         q = mp.Queue()
-        self.mining_process = mp.Process(target=mine_block, args=(self.transaction_pool.get_transactions(),
-                                                                  self.blockchain.get_last_block().hash,
-                                                                  self.blockchain.current_target,
-                                                                  self.wallet.to_dict()),
+        self.mining_process = mp.Process(name='miner', target=mine_block,
+                                         args=(self.transaction_pool.get_transactions(),
+                                               self.blockchain.get_last_block().hash,
+                                               self.blockchain.current_target,
+                                               self.wallet.to_dict()),
                                          kwargs={'queue': q})
         self.mining_process.start()
-        self.blockchain.add_block(Block.from_dict(q.get()))
-        print(f"Mined block: {self.blockchain.get_last_block().hash}")
-        self.start_mining()
-        self.mining_process.join()
+        return Block.from_dict(q.get())
 
     def send_money(self, recipient: str, amount: float):
         balance = self.blockchain.get_balance(self.wallet.address)
