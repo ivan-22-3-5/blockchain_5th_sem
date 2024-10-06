@@ -3,11 +3,11 @@ import multiprocessing as mp
 import json
 import socket
 import os
-from typing import Optional
 
 from block import Block
 from chain import Chain
 from mining import mine_block
+from src.custom_exceptions import InsufficientFundsError
 from transaction import Transaction
 from transaction_pool import TransactionPool
 from wallet import Wallet
@@ -22,7 +22,7 @@ class Node:
         self.port = port
         self.peers = []
         self.server = None
-        self.mining_process: Optional[mp.Process] = None
+        self.mining_thread = None
         self.is_mining = False
         self.initialize_connections()
 
@@ -37,13 +37,12 @@ class Node:
         if self.is_mining:
             return
         self.is_mining = True
-        threading.Thread(target=self.mining).start()
+        self.mining_thread = threading.Thread(target=self.mining)
+        self.mining_thread.start()
 
     def stop_mining(self):
-        if not self.is_mining:
-            return
-        self.mining_process.kill()
         self.is_mining = False
+        self.mining_thread.join()
 
     def restart_mining(self):
         self.stop_mining()
@@ -57,13 +56,12 @@ class Node:
 
     def _mine_block(self) -> Block:
         q = mp.Queue()
-        self.mining_process = mp.Process(name='miner', target=mine_block,
-                                         args=(self.transaction_pool.get_transactions(),
-                                               self.blockchain.get_last_block().hash,
-                                               self.blockchain.current_target,
-                                               self.wallet.to_dict()),
-                                         kwargs={'queue': q})
-        self.mining_process.start()
+        mp.Process(name='miner', target=mine_block,
+                   args=(self.transaction_pool.get_transactions(),
+                         self.blockchain.get_last_block().hash,
+                         self.blockchain.current_target,
+                         self.wallet.to_dict()),
+                   kwargs={'queue': q}).start()
         return Block.from_dict(q.get())
 
     def send_money(self, recipient: str, amount: float):
