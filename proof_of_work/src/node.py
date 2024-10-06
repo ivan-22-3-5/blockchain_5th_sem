@@ -67,7 +67,7 @@ class Node:
     def send_money(self, recipient: str, amount: float):
         balance = self.blockchain.get_balance(self.wallet.address)
         if balance < amount:
-            raise Exception("Insufficient funds")
+            raise InsufficientFundsError("Insufficient funds")
         new_transaction = (Transaction(self.wallet.address, recipient, amount, fee=amount * 0.01).
                            sign(self.wallet.private_key, self.wallet.public_key))
         self.transaction_pool.add(new_transaction)
