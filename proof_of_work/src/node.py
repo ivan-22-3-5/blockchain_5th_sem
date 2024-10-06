@@ -82,21 +82,19 @@ class Node:
 
         while True:
             conn, addr = self.server.accept()
-            self.peers.append(conn)
             print(f"Connected by {addr}")
-            threading.Thread(target=self.handle_peer, args=(conn,)).start()
+            threading.Thread(target=self.listen_to_peer, args=(conn,)).start()
 
-    def handle_peer(self, conn):
+    def listen_to_peer(self, peer_socket):
         try:
-            self.peers.append(conn)
             while True:
-                data = conn.recv(10240).decode()
+                data = peer_socket.recv(10240).decode()
                 if not data:
                     break
                 message = json.loads(data)
                 self.process_message(message)
         except Exception as e:
-            print(f"Error handling peer: {e}")
+            print(f"Error in peer communication: {e}")
 
     def process_message(self, message):
         msg_type = message.get('type')
@@ -114,17 +112,6 @@ class Node:
         self.peers.append(peer_socket)
         threading.Thread(target=self.listen_to_peer, args=(peer_socket,)).start()
         print(f"Connected to peer {peer_host}:{peer_port}")
-
-    def listen_to_peer(self, peer_socket):
-        try:
-            while True:
-                data = peer_socket.recv(10240).decode()
-                if not data:
-                    break
-                message = json.loads(data)
-                self.process_message(message)
-        except Exception as e:
-            print(f"Error in peer communication: {e}")
 
     def broadcast(self, message: dict):
         for peer in self.peers:
