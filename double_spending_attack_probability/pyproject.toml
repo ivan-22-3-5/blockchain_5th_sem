@@ -8,6 +8,7 @@ packages = [{include = "double_spending_attack_probability"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
+prettytable = "^3.11.0"
 
 
 [build-system]
