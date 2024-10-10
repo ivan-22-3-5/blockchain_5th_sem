@@ -1,6 +1,7 @@
 import os
 from time import sleep
 
+from src.custom_exceptions import InsufficientFundsError
 from src.node import Node
 
 
@@ -9,7 +10,11 @@ def main():
     node.start_mining()
 
     while True:
-        sleep(10)
+        sleep(15)
+        try:
+            node.send_money("AnotherWallet", 10)
+        except InsufficientFundsError:
+            ...
 
 
 if __name__ == '__main__':

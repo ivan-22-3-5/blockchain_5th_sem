@@ -92,7 +92,8 @@ class Node:
                 data = peer_socket.recv(10240).decode()
                 if not data:
                     break
-                self.process_message(json.loads(data))
+                for json_string in data.split('\0')[:-1]:
+                    self.process_message(json.loads(json_string))
         except Exception as e:
             print(f"Error in peer communication: {e}")
 
@@ -121,7 +122,7 @@ class Node:
     def broadcast(self, message: dict):
         for peer in self.peers:
             try:
-                peer.sendall(json.dumps(message).encode())
+                peer.sendall((json.dumps(message)+'\0').encode())
             except Exception as e:
                 print(f"Failed to send message to peer: {e}")
 
