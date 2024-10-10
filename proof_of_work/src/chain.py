@@ -21,7 +21,7 @@ class Chain:
                                           previous_hash="none",
                                           target=0,
                                           nonce=0)]
-        self.current_target: int = 3
+        self.current_target: int = 4
 
     def add_block(self, block: Block):
         if self.verify_block(block):

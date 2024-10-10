@@ -57,7 +57,7 @@ class Node:
     def _mine_block(self) -> Block:
         q = mp.Queue()
         mp.Process(name='miner', target=mine_block,
-                   args=(self.transaction_pool.get_transactions(),
+                   args=([t.to_dict() for t in self.transaction_pool.get_transactions()],
                          self.blockchain.get_last_block().hash,
                          self.blockchain.current_target,
                          self.wallet.to_dict()),
@@ -104,7 +104,9 @@ class Node:
                 self.blockchain.add_block(block)
                 self.restart_mining()
             case 'transaction':
-                self.transaction_pool.add(Transaction.from_dict(message['transaction']))
+                transaction = Transaction.from_dict(message['transaction'])
+                print(f"Received transaction {transaction.hash} validity: {transaction.verify()}")
+                self.transaction_pool.add(transaction)
             case _:
                 print(f"Unknown message type: {msg_type}")
 
@@ -131,6 +133,7 @@ class Node:
         self.broadcast(message)
 
     def send_transaction(self, transaction: Transaction):
+        print(f"Sending transaction: {transaction.hash}")
         message = {
             'type': 'transaction',
             'transaction': transaction.to_dict()
