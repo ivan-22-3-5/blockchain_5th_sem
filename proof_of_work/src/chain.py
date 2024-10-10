@@ -23,12 +23,14 @@ class Chain:
                                           nonce=0)]
         self.current_target: int = 4
 
-    def add_block(self, block: Block):
-        if self.verify_block(block):
-            self._chain.append(block)
-            print(f"Block {block.hash} added previous hash: {block.previous_hash}")
-            if int(len(self._chain) / 1000) > self.current_target:
-                self.current_target += 1
+    def add_block(self, block: Block) -> bool:
+        if not self.verify_block(block):
+            return False
+        self._chain.append(block)
+        print(f"Block {block.hash} added previous hash: {block.previous_hash}")
+        if int(len(self._chain) / 1000) > self.current_target:
+            self.current_target += 1
+        return True
 
     def verify_block(self, block: Block) -> bool:
         return all([

@@ -51,8 +51,9 @@ class Node:
     def mining(self):
         while self.is_mining:
             block = self._mine_block()
-            self.blockchain.add_block(block)
-            self.send_block(block)
+            if self.blockchain.add_block(block):
+                print(f"Found block {block.hash}. Sending to peers.")
+                self.send_block(block)
 
     def _mine_block(self) -> Block:
         q = mp.Queue()
@@ -125,7 +126,6 @@ class Node:
                 print(f"Failed to send message to peer: {e}")
 
     def send_block(self, block: Block):
-        print(f"Sending block: {block.hash}")
         message = {
             'type': 'block',
             'block': block.to_dict()
