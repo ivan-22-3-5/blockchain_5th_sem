@@ -16,11 +16,8 @@ def verify_signature(signature: str, data: str, key: RSAPublicKey) -> bool:
                    padding=padding.PSS(mgf=padding.MGF1(hashes.SHA256()),
                                        salt_length=padding.PSS.MAX_LENGTH),
                    algorithm=hashes.SHA256())
-    except InvalidSignature:
+    except (InvalidSignature, ValueError):
         return False
-    except ValueError:
-        return False
-
     return True
 
 
