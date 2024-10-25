@@ -20,7 +20,8 @@ class Node:
             if self.block_confirmations[block.hash] >= len(self.peers) * 2 / 3:
                 self.blockchain.add_block(block)
             else:
-                self.pending_blocks[block.hash] = block
+                if block.hash not in self.pending_blocks:
+                    self.pending_blocks[block.hash] = block
             self.send_block_confirmation(block.hash)
 
     def receive_message(self, message: str):
@@ -29,9 +30,10 @@ class Node:
             return
         if validity == 'valid':
             self.block_confirmations[block_hash] += 1
-            if self.block_confirmations[block_hash] >= len(self.peers) * 2 / 3:
-                if (block := self.pending_blocks.pop(block_hash, None)) is not None:
-                    self.blockchain.add_block(block)
+            if self.block_confirmations[block_hash] < len(self.peers) * 2 / 3:
+                return
+            if (block := self.pending_blocks.pop(block_hash, None)) is not None:
+                self.blockchain.add_block(block)
 
     def connect_peer(self, peer: 'Node'):
         self.peers.append(peer)
@@ -60,5 +62,6 @@ class Node:
             ).sign(self.wallet.private_key, self.wallet.public_key)],
             previous_hash=self.blockchain.last_block.hash
         ).sign(self.wallet.private_key, self.wallet.public_key)
+
         self.blockchain.add_block(block)
         self.broadcast_block(block)

@@ -8,7 +8,7 @@ def start_process(node: Node):
 
 
 def main():
-    n = 10
+    n = 50
     nodes = [Node() for _ in range(n)]
 
     for i in range(n):

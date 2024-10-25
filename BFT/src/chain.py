@@ -19,7 +19,6 @@ class Chain:
     def add_block(self, block: Block) -> bool:
         if not self.verify_block(block):
             return False
-        print(f"Block {block.hash} added")
         self._chain.append(block)
         return True
 
